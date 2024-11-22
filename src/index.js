@@ -14,6 +14,7 @@ async function run() {
     const bodyTemplate = core.getInput('body-template');
     const createLabel = core.getBooleanInput('create-label');
     const alwaysCreateNewIssue = core.getBooleanInput('always-create-new-issue');
+    const searchByTitle = core.getBooleanInput('search-by-title');
 
     const { issueNumber, created } = await newIssueOrCommentForLabel(
       githubToken,
@@ -21,7 +22,8 @@ async function run() {
       titleTemplate,
       bodyTemplate,
       createLabel,
-      alwaysCreateNewIssue,
+      alwaysCreateNewIssu,
+      searchByTitle,
     )
     const htmlUrl = created.html_url
     core.info("Created url: " + htmlUrl);

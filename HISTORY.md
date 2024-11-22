@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add new boolean config option `search-by-title`. If set to `true`, 
+  existing issues are searched using the issue title (`titleTemplate`) 
+  in addition to the `label-name`.
+
 ## v1.2.0 (2024-02-16)
 
 - Changed action to use [Node 20 runtime](https://github.blog/changelog/2023-09-22-github-actions-transitioning-from-node-16-to-node-20/)
