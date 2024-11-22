@@ -2,8 +2,10 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 var Mustache = require('mustache');
 
+const queryIssueTemplate = "{{title}}+in:title+label:{{label}}+repro:{{owner}}/{{repo}}+state:open+is:issue&sort=created&order=asc";
+
 let newIssueOrCommentForLabel = async function (
-  githubToken, labelName, titleTemplate, bodyTemplate, createLabel, alwaysCreateNewIssue
+  githubToken, labelName, titleTemplate, bodyTemplate, createLabel, alwaysCreateNewIssue, searchByTitle
 ) {
   // octokit client
   // https://octokit.github.io/rest.js/
@@ -18,7 +20,10 @@ let newIssueOrCommentForLabel = async function (
   core.debug("bodyTemplate: " + bodyTemplate)
   core.debug("createLabel: " + String(createLabel))
   core.debug("alwaysCreateNewIssue: " + String(alwaysCreateNewIssue))
+  core.debug("searchByTitle: " + String(searchByTitle))
   core.debug("context: " + JSON.stringify(context))
+
+  let title = Mustache.render(titleTemplate, context);
 
   core.info("Checking if label '" + labelName + "' exists...")
   try {
@@ -48,17 +53,33 @@ let newIssueOrCommentForLabel = async function (
     }
   }
 
-  core.info("Finding latest open issue with label '" + labelName + "'...")
-  const { data: issues_with_label } = await octokit.rest.issues.listForRepo({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    labels: [labelName],
-    state: 'open',
-    sort: 'created',
-    direction: 'desc',
-    per_page: 1,
-    page: 1,
-  });
+  let issues_with_label;
+  if (searchByTitle === false) {
+      core.info("Finding latest open issue with label '" + labelName + "'...")
+      const response = await octokit.rest.issues.listForRepo({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: [labelName],
+        state: 'open',
+        sort: 'created',
+        direction: 'desc',
+        per_page: 1,
+        page: 1,
+      });
+      issues_with_label = response.data;
+  } else {
+      core.info("Finding latest open issue with title '" + title + "'...")
+      var q = Mustache.render(queryIssueTemplate, {
+        title: title,
+        label: labelName,
+        owner: context.repo.owner,
+        repo: context.repo.repo
+      });
+      const response = await octokit.rest.search.issuesAndPullRequests({
+       q,
+      });
+      issues_with_label = response.data;
+  }
 
   let issueNumber;
   let create_issue_or_comment_response;

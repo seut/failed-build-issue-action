@@ -81,6 +81,43 @@ describe("Test newIssueOrCommentForLabel", () => {
       defaultBodyTemplate,
       true,
       false,
+      false,
+    )
+    expect(issueNumber).toBe(newIssueNumber);
+    expect(created).toBeTruthy();
+    return
+  });
+
+  it('should create new issue if no issues exist for title', async () => {
+    // Mock check if label exists
+    nock("https://api.github.com")
+      .get(`/repos/${testOwner}/${testRepo}/labels/${encodeURI(testLabel)}`)
+      .reply(200, {
+        owner: testOwner,
+        repo: testRepo,
+        name: testLabel,
+      });
+    // Mock search issues with title and label
+    nock("https://api.github.com")
+      .get(`/search/issues`)
+      .query(true)
+      .reply(200, []);
+    // Mock create new issue
+    const newIssueNumber = 100;
+    nock("https://api.github.com")
+      .post(`/repos/${testOwner}/${testRepo}/issues`)
+      .reply(200, {
+        number: newIssueNumber,
+      });
+
+    const { issueNumber, created } = await newIssueOrCommentForLabel(
+      "github_token_here",
+      testLabel,
+      defaultTitleTemplate,
+      defaultBodyTemplate,
+      true,
+      false,
+      true,
     )
     expect(issueNumber).toBe(newIssueNumber);
     expect(created).toBeTruthy();
@@ -122,6 +159,49 @@ describe("Test newIssueOrCommentForLabel", () => {
       defaultBodyTemplate,
       true,
       false,
+      false,
+    )
+    expect(issueNumber).toBe(existingIssueNumber);
+    expect(created).toBeTruthy();
+    return
+  });
+
+  it('should add comment to existing issue for title and label', async () => {
+    // Mock check if label exists
+    nock("https://api.github.com")
+      .get(`/repos/${testOwner}/${testRepo}/labels/${encodeURI(testLabel)}`)
+      .reply(200, {
+        owner: testOwner,
+        repo: testRepo,
+        name: testLabel,
+      });
+    // Mock search issues with title and label
+    const existingIssueNumber = 1;
+    nock("https://api.github.com")
+      .get(`/search/issues`)
+      .query(true)
+      .reply(200, [
+        {
+          number: existingIssueNumber,
+        }
+      ]);
+    // Mock create comment on existing issue
+    nock("https://api.github.com")
+      .post(`/repos/${testOwner}/${testRepo}/issues/${existingIssueNumber}/comments`)
+      .reply(200,
+        {
+          id: 1,
+        }
+      );
+
+    const { issueNumber, created } = await newIssueOrCommentForLabel(
+      "github_token_here",
+      testLabel,
+      defaultTitleTemplate,
+      defaultBodyTemplate,
+      true,
+      false,
+      true,
     )
     expect(issueNumber).toBe(existingIssueNumber);
     expect(created).toBeTruthy();
@@ -162,6 +242,7 @@ describe("Test newIssueOrCommentForLabel", () => {
       defaultBodyTemplate,
       false,
       true,
+      false,
     )
     expect(issueNumber).toBe(newIssueNumber);
     expect(created).toBeTruthy();
@@ -197,6 +278,7 @@ describe("Test newIssueOrCommentForLabel", () => {
       defaultBodyTemplate,
       false,
       true,
+      false,
     )
     expect(issueNumber).toBe(newIssueNumber);
     expect(created).toBeTruthy();
@@ -217,6 +299,7 @@ describe("Test newIssueOrCommentForLabel", () => {
         testLabel,
         defaultTitleTemplate,
         defaultBodyTemplate,
+        false,
         false,
         false,
       )
@@ -258,6 +341,7 @@ describe("Test newIssueOrCommentForLabel", () => {
       defaultBodyTemplate,
       true,
       false,
+      false,
     )
     expect(issueNumber).toBe(newIssueNumber);
     expect(created).toBeTruthy();
@@ -278,6 +362,7 @@ describe("Test newIssueOrCommentForLabel", () => {
         testLabel,
         defaultTitleTemplate,
         defaultBodyTemplate,
+        false,
         false,
         false,
       )
