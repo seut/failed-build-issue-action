@@ -31,6 +31,10 @@ inputs:
     description: "If true, will always create a new issue, even if one matching 'label-name' is already open."
     required: true
     default: false
+  search-by-title:
+    description: "If true, search for an existing issue is based on the 'title-template' and the 'label-name'."
+    required: true
+    default: false
 # outputs will be available to future steps
 outputs:
   issue-number:
