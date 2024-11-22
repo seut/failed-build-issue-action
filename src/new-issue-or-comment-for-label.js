@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 var Mustache = require('mustache');
 
-const queryIssueTemplate = "{{title}}+in:title+label:{{label}}+repro:{{owner}}/{{repo}}+state:open+is:issue&sort=created&order=asc";
+const queryIssueTemplate = "{{title}}+in:title+repo:{{owner}}/{{repo}}+state:open+is:issue&sort=created&order=asc";
 
 let newIssueOrCommentForLabel = async function (
   githubToken, labelName, titleTemplate, bodyTemplate, createLabel, alwaysCreateNewIssue, searchByTitle
@@ -71,14 +71,15 @@ let newIssueOrCommentForLabel = async function (
       core.info("Finding latest open issue with title '" + title + "'...")
       var q = Mustache.render(queryIssueTemplate, {
         title: title,
-        label: labelName,
         owner: context.repo.owner,
         repo: context.repo.repo
       });
+      core.info("Search issues by query=" + q)
       const response = await octokit.rest.search.issuesAndPullRequests({
-       q,
+        q,
       });
-      issues_with_label = response.data;
+      core.info("Search issues response: " + JSON.stringify(response.data))
+      issues_with_label = response.data.items;
   }
 
   let issueNumber;
