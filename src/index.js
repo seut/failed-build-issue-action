@@ -22,7 +22,7 @@ async function run() {
       titleTemplate,
       bodyTemplate,
       createLabel,
-      alwaysCreateNewIssue,
+      alwaysCreateNewIssu,
       searchByTitle,
     )
     const htmlUrl = created.html_url
